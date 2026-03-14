@@ -1,0 +1,243 @@
+/* ============================================
+   Blueprint - 工程蓝图风格
+   浅蓝网格底纹、层级竖线标题、橙色标注
+   适配小红书卡片渲染
+   ============================================ */
+
+/* 配色定义
+   背景色: #F0F4F8 (浅蓝灰工程纸)
+   网格线: #C5D3E0 (淡蓝网格)
+   主文字: #2B3A4A (深蓝灰)
+   主色:   #2B5797 (工程蓝)
+   深色:   #1A3A5C (深蓝)
+   标注色: #E67E22 (橙色标注)
+   辅助:   #3498DB (浅蓝)
+   代码底: #E8EEF4 (极浅蓝)
+*/
+
+.card-inner {
+  background-color: #F0F4F8;
+  /* 工程图纸网格 — 细线 + 粗线双层 */
+  background-image:
+    linear-gradient(#C5D3E0 0.5px, transparent 0.5px),
+    linear-gradient(90deg, #C5D3E0 0.5px, transparent 0.5px),
+    linear-gradient(rgba(43, 87, 151, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 87, 151, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+}
+
+.card-content {
+  color: #2B3A4A;
+  font-size: 34px;
+  line-height: 1.65;
+}
+
+/* === 标题：左侧竖线层级系统 === */
+
+.card-content h1 {
+  font-size: 56px;
+  font-weight: 800;
+  color: #1A3A5C;
+  margin-bottom: 32px;
+  line-height: 1.3;
+  padding-left: 32px;
+  border-left: 8px solid #2B5797;
+  /* 标题底部细蓝线 */
+  padding-bottom: 12px;
+  border-bottom: 2px solid #C5D3E0;
+}
+
+.card-content h2 {
+  font-size: 44px;
+  font-weight: 700;
+  color: #2B5797;
+  margin: 36px 0 20px 0;
+  line-height: 1.4;
+  padding-left: 28px;
+  border-left: 5px solid #2B5797;
+  border-bottom: none;
+}
+
+.card-content h3 {
+  font-size: 38px;
+  font-weight: 600;
+  color: #3D6BA3;
+  margin: 28px 0 16px 0;
+  padding-left: 24px;
+  border-left: 3px solid #8BAED4;
+}
+
+/* === 段落 === */
+
+.card-content p {
+  margin-bottom: 24px;
+}
+
+/* === 强调：橙色标注 === */
+
+.card-content strong,
+.card-content b {
+  font-weight: 700;
+  color: #D35400;
+  /* 底部橙色细线模拟手工标注 */
+  border-bottom: 3px solid rgba(230, 126, 34, 0.4);
+  padding-bottom: 2px;
+}
+
+.card-content em,
+.card-content i {
+  font-style: italic;
+  color: #2B5797;
+}
+
+/* === 链接 === */
+
+.card-content a {
+  color: #2B5797;
+  text-decoration: none;
+  border-bottom: 2px solid #8BAED4;
+  transition: border-color 0.2s;
+}
+
+/* === 列表 === */
+
+.card-content ul,
+.card-content ol {
+  margin: 20px 0;
+  padding-left: 50px;
+}
+
+.card-content li {
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+
+.card-content li::marker {
+  color: #2B5797;
+  font-weight: 700;
+}
+
+/* === 引用块：橙色标注栏 === */
+
+.card-content blockquote {
+  margin: 24px 0;
+  padding: 20px 28px;
+  background-color: rgba(230, 126, 34, 0.06);
+  color: #4A3728;
+  border-left: 6px solid #E67E22;
+  border-radius: 0 8px 8px 0;
+}
+
+.card-content blockquote p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* === 行内代码 === */
+
+.card-content code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 30px;
+  background-color: rgba(43, 87, 151, 0.08);
+  color: #1A3A5C;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid #C5D3E0;
+}
+
+/* === 代码块 === */
+
+.card-content pre {
+  margin: 24px 0;
+  padding: 28px;
+  background-color: #E8EEF4;
+  color: #1A3A5C;
+  border: 1.5px solid #8BAED4;
+  border-radius: 8px;
+  overflow-x: visible;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.card-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border: none;
+  font-size: 28px;
+  line-height: 1.45;
+}
+
+/* === 表格：蓝色边框 + 交替行 === */
+
+.card-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 30px;
+}
+
+.card-content thead th {
+  background-color: #2B5797;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 12px 16px;
+  text-align: left;
+  border: 1.5px solid #1A3A5C;
+}
+
+.card-content tbody td {
+  padding: 10px 16px;
+  border: 1px solid #C5D3E0;
+}
+
+.card-content tbody tr:nth-child(odd) {
+  background-color: rgba(43, 87, 151, 0.04);
+}
+
+.card-content tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* === 分割线：蓝色虚线 === */
+
+.card-content hr {
+  margin: 36px 0;
+  border: none;
+  height: 0;
+  border-top: 2px dashed #8BAED4;
+}
+
+/* === 图片 === */
+
+.card-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 24px auto;
+  border: 1.5px solid #8BAED4;
+  box-shadow: 0 3px 12px rgba(43, 87, 151, 0.12);
+}
+
+/* === Tags === */
+
+.tags-container {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 2px solid #C5D3E0;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #2B5797;
+  color: #FFFFFF;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 28px;
+  margin: 6px 10px 6px 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}

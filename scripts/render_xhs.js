@@ -44,7 +44,8 @@ const AVAILABLE_THEMES = [
     'professional',
     'retro',
     'terminal',
-    'sketch'
+    'sketch',
+    'blueprint'
 ];
 
 // 分页模式
@@ -59,7 +60,8 @@ const THEME_BACKGROUNDS = {
     'professional': 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
     'retro': 'linear-gradient(135deg, #D35400 0%, #F39C12 100%)',
     'terminal': 'linear-gradient(135deg, #0D1117 0%, #161B22 100%)',
-    'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)'
+    'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)',
+    'blueprint': 'linear-gradient(135deg, #2B5797 0%, #3D6BA3 100%)'
 };
 
 // 封面标题文字渐变（随主题变化）
@@ -72,6 +74,7 @@ const THEME_TITLE_GRADIENTS = {
     'retro': 'linear-gradient(180deg, #8B4513 0%, #D35400 100%)',
     'terminal': 'linear-gradient(180deg, #39D353 0%, #58A6FF 100%)',
     'sketch': 'linear-gradient(180deg, #111827 0%, #6B7280 100%)',
+    'blueprint': 'linear-gradient(180deg, #1A3A5C 0%, #2B5797 100%)',
 };
 
 /**

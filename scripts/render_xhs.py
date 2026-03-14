@@ -63,7 +63,8 @@ AVAILABLE_THEMES = [
     'professional',
     'retro',
     'terminal',
-    'sketch'
+    'sketch',
+    'blueprint'
 ]
 
 # 分页模式
@@ -171,7 +172,8 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'professional': 'linear-gradient(180deg, #2563EB 0%, #3B82F6 100%)',
         'retro': 'linear-gradient(180deg, #D35400 0%, #F39C12 100%)',
         'terminal': 'linear-gradient(180deg, #0D1117 0%, #21262D 100%)',
-        'sketch': 'linear-gradient(180deg, #555555 0%, #999999 100%)'
+        'sketch': 'linear-gradient(180deg, #555555 0%, #999999 100%)',
+        'blueprint': 'linear-gradient(180deg, #2B5797 0%, #1A3A5C 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
 
@@ -185,6 +187,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'retro': 'linear-gradient(180deg, #8B4513 0%, #D35400 100%)',
         'terminal': 'linear-gradient(180deg, #39D353 0%, #58A6FF 100%)',
         'sketch': 'linear-gradient(180deg, #111827 0%, #6B7280 100%)',
+        'blueprint': 'linear-gradient(180deg, #1A3A5C 0%, #2B5797 100%)',
     }
     title_bg = title_gradients.get(theme, title_gradients['default'])
     
@@ -292,10 +295,11 @@ def generate_card_html(content: str, theme: str, page_number: int = 1,
         'professional': 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
         'retro': 'linear-gradient(135deg, #D35400 0%, #F39C12 100%)',
         'terminal': 'linear-gradient(135deg, #0D1117 0%, #161B22 100%)',
-        'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)'
+        'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)',
+        'blueprint': 'linear-gradient(135deg, #2B5797 0%, #3D6BA3 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
-    
+
     # 根据模式设置不同的容器样式
     if mode == 'auto-fit':
         container_style = f'''
@@ -428,102 +432,92 @@ def generate_card_html(content: str, theme: str, page_number: int = 1,
     return html
 
 
-async def render_html_to_image(html_content: str, output_path: str, 
-                               width: int = DEFAULT_WIDTH, 
+async def render_html_to_image(html_content: str, output_path: str,
+                               width: int = DEFAULT_WIDTH,
                                height: int = DEFAULT_HEIGHT,
                                mode: str = 'separator',
                                max_height: int = MAX_HEIGHT,
-                               dpr: int = 2):
+                               dpr: int = 2,
+                               browser=None,
+                               page=None):
     """使用 Playwright 将 HTML 渲染为图片"""
-    async with async_playwright() as p:
-        browser = await p.chromium.launch()
-        
-        # 设置视口大小
-        viewport_height = height if mode != 'dynamic' else max_height
+    own_browser = browser is None
+    own_page = page is None
+    p_instance = None
+    if own_browser:
+        p_instance = await async_playwright().start()
+        browser = await p_instance.chromium.launch()
+
+    if own_page:
+        viewport_height = max_height
         page = await browser.new_page(
             viewport={'width': width, 'height': viewport_height},
             device_scale_factor=dpr
         )
-        
-        # 创建临时 HTML 文件
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
-            f.write(html_content)
-            temp_html_path = f.name
-        
-        try:
-            await page.goto(f'file://{temp_html_path}')
-            await page.wait_for_load_state('networkidle')
-            
-            # 等待字体加载
-            await page.wait_for_timeout(500)
-            
-            if mode == 'auto-fit':
-                # 自动缩放模式：对整个内容块做 transform 缩放（标题/代码块等固定 px 也会一起缩放）
-                await page.evaluate('''() => {
-                    const viewportContent = document.querySelector('.card-content');
-                    const scaleEl = document.querySelector('.card-content-scale');
-                    if (!viewportContent || !scaleEl) return;
 
-                    // 先重置，测量原始尺寸
-                    scaleEl.style.transform = 'none';
-                    scaleEl.style.width = '';
-                    scaleEl.style.height = '';
+    try:
+        await page.set_content(html_content, wait_until='load')
 
-                    const availableWidth = viewportContent.clientWidth;
-                    const availableHeight = viewportContent.clientHeight;
+        # 等待字体加载（用 JS Promise 替代硬等待）
+        await page.evaluate('() => document.fonts.ready')
 
-                    // scrollWidth/scrollHeight 反映内容的自然尺寸
-                    const contentWidth = Math.max(scaleEl.scrollWidth, scaleEl.getBoundingClientRect().width);
-                    const contentHeight = Math.max(scaleEl.scrollHeight, scaleEl.getBoundingClientRect().height);
+        if mode == 'auto-fit':
+            # 自动缩放模式：对整个内容块做 transform 缩放
+            await page.evaluate('''() => {
+                const viewportContent = document.querySelector('.card-content');
+                const scaleEl = document.querySelector('.card-content-scale');
+                if (!viewportContent || !scaleEl) return;
 
-                    if (!contentWidth || !contentHeight || !availableWidth || !availableHeight) return;
+                scaleEl.style.transform = 'none';
+                scaleEl.style.width = '';
+                scaleEl.style.height = '';
 
-                    // 只缩小不放大，避免“撑太大”
-                    const scale = Math.min(1, availableWidth / contentWidth, availableHeight / contentHeight);
+                const availableWidth = viewportContent.clientWidth;
+                const availableHeight = viewportContent.clientHeight;
+                const contentWidth = Math.max(scaleEl.scrollWidth, scaleEl.getBoundingClientRect().width);
+                const contentHeight = Math.max(scaleEl.scrollHeight, scaleEl.getBoundingClientRect().height);
 
-                    // 为避免 transform 后布局尺寸不匹配导致裁切，扩大布局盒子
-                    scaleEl.style.width = (availableWidth / scale) + 'px';
+                if (!contentWidth || !contentHeight || !availableWidth || !availableHeight) return;
 
-                    // 顶部对齐更稳；如需居中可计算 offset
-                    const offsetX = 0;
-                    const offsetY = 0;
+                const scale = Math.min(1, availableWidth / contentWidth, availableHeight / contentHeight);
+                scaleEl.style.width = (availableWidth / scale) + 'px';
 
-                    scaleEl.style.transformOrigin = 'top left';
-                    scaleEl.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-                }''')
-                await page.wait_for_timeout(100)
-                actual_height = height
-                
-            elif mode == 'dynamic':
-                # 动态高度模式：根据内容调整图片高度
-                content_height = await page.evaluate('''() => {
-                    const container = document.querySelector('.card-container');
-                    return container ? container.scrollHeight : document.body.scrollHeight;
-                }''')
-                # 确保高度在合理范围内
-                actual_height = max(height, min(content_height, max_height))
-                
-            else:  # separator 和 auto-split
-                # 获取实际内容高度
-                content_height = await page.evaluate('''() => {
-                    const container = document.querySelector('.card-container');
-                    return container ? container.scrollHeight : document.body.scrollHeight;
-                }''')
-                actual_height = max(height, content_height)
-            
-            # 截图
-            await page.screenshot(
-                path=output_path,
-                clip={'x': 0, 'y': 0, 'width': width, 'height': actual_height},
-                type='png'
-            )
-            
-            print(f"  ✅ 已生成: {output_path} ({width}x{actual_height})")
-            return actual_height
-            
-        finally:
-            os.unlink(temp_html_path)
+                scaleEl.style.transformOrigin = 'top left';
+                scaleEl.style.transform = `scale(${scale})`;
+            }''')
+            actual_height = height
+
+        elif mode == 'dynamic':
+            content_height = await page.evaluate('''() => {
+                const container = document.querySelector('.card-container');
+                return container ? container.scrollHeight : document.body.scrollHeight;
+            }''')
+            actual_height = max(height, min(content_height, max_height))
+
+        else:  # separator 和 auto-split
+            content_height = await page.evaluate('''() => {
+                const container = document.querySelector('.card-container');
+                return container ? container.scrollHeight : document.body.scrollHeight;
+            }''')
+            actual_height = max(height, content_height)
+
+        # 截图
+        await page.screenshot(
+            path=output_path,
+            clip={'x': 0, 'y': 0, 'width': width, 'height': actual_height},
+            type='png'
+        )
+
+        print(f"  ✅ 已生成: {output_path} ({width}x{actual_height})")
+        return actual_height
+
+    finally:
+        if own_page:
+            await page.close()
+        if own_browser:
             await browser.close()
+            if p_instance:
+                await p_instance.stop()
 
 
 async def auto_split_content(body: str, theme: str, width: int, height: int, 
@@ -551,21 +545,14 @@ async def auto_split_content(body: str, theme: str, width: int, height: int,
                 
                 html = generate_card_html(test_md, theme, 1, 1, width, height, 'auto-split')
                 
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
-                    f.write(html)
-                    temp_path = f.name
-                
-                await page.goto(f'file://{temp_path}')
-                await page.wait_for_load_state('networkidle')
-                await page.wait_for_timeout(200)
+                await page.set_content(html, wait_until='load')
+                await page.evaluate('() => document.fonts.ready')
                 
                 content_height = await page.evaluate('''() => {
                     const content = document.querySelector('.card-content');
                     return content ? content.scrollHeight : 0;
                 }''')
-                
-                os.unlink(temp_path)
-                
+
                 # 内容区域的可用高度（去除 padding 等）
                 available_height = height - 220  # 50*2 padding + 60*2 inner padding
 
@@ -617,20 +604,32 @@ async def render_markdown_to_cards(md_file: str, output_dir: str,
     total_cards = len(card_contents)
     print(f"  📄 检测到 {total_cards} 张正文卡片")
     
-    # 生成封面
-    if metadata.get('emoji') or metadata.get('title'):
-        print("  📷 生成封面...")
-        cover_html = generate_cover_html(metadata, theme, width, height)
-        cover_path = os.path.join(output_dir, 'cover.png')
-        await render_html_to_image(cover_html, cover_path, width, height, 'separator', max_height, dpr)
-    
-    # 生成正文卡片
-    for i, content in enumerate(card_contents, 1):
-        print(f"  📷 生成卡片 {i}/{total_cards}...")
-        card_html = generate_card_html(content, theme, i, total_cards, width, height, mode)
-        card_path = os.path.join(output_dir, f'card_{i}.png')
-        await render_html_to_image(card_html, card_path, width, height, mode, max_height, dpr)
-    
+    # 启动一次浏览器，复用给所有卡片
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        # 创建一个持久 page，复用以保持字体缓存
+        shared_page = await browser.new_page(
+            viewport={'width': width, 'height': max_height},
+            device_scale_factor=dpr
+        )
+
+        # 生成封面
+        if metadata.get('emoji') or metadata.get('title'):
+            print("  📷 生成封面...")
+            cover_html = generate_cover_html(metadata, theme, width, height)
+            cover_path = os.path.join(output_dir, 'cover.png')
+            await render_html_to_image(cover_html, cover_path, width, height, 'separator', max_height, dpr, browser=browser, page=shared_page)
+
+        # 生成正文卡片
+        for i, content in enumerate(card_contents, 1):
+            print(f"  📷 生成卡片 {i}/{total_cards}...")
+            card_html = generate_card_html(content, theme, i, total_cards, width, height, mode)
+            card_path = os.path.join(output_dir, f'card_{i}.png')
+            await render_html_to_image(card_html, card_path, width, height, mode, max_height, dpr, browser=browser, page=shared_page)
+
+        await shared_page.close()
+        await browser.close()
+
     print(f"\n✨ 渲染完成！图片已保存到: {output_dir}")
     return total_cards
 

@@ -76,7 +76,7 @@ python scripts/render_xhs.py content.md -m auto-fit
 
 生成结果：`cover.png`（封面）+ `card_1.png`、`card_2.png`...（正文卡片）
 
-**可用主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`
+**可用主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`blueprint`
 
 **分页模式**（`-m`）：`separator`、`auto-fit`、`auto-split`、`dynamic`
 
