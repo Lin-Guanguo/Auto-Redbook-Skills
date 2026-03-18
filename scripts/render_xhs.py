@@ -64,7 +64,8 @@ AVAILABLE_THEMES = [
     'retro',
     'terminal',
     'sketch',
-    'blueprint'
+    'blueprint',
+    'nightfall'
 ]
 
 # 分页模式
@@ -173,7 +174,8 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'retro': 'linear-gradient(180deg, #D35400 0%, #F39C12 100%)',
         'terminal': 'linear-gradient(180deg, #0D1117 0%, #21262D 100%)',
         'sketch': 'linear-gradient(180deg, #555555 0%, #999999 100%)',
-        'blueprint': 'linear-gradient(180deg, #2B5797 0%, #1A3A5C 100%)'
+        'blueprint': 'linear-gradient(180deg, #2B5797 0%, #1A3A5C 100%)',
+        'nightfall': 'linear-gradient(180deg, #1e1e2e 0%, #302d41 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
 
@@ -188,9 +190,37 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'terminal': 'linear-gradient(180deg, #39D353 0%, #58A6FF 100%)',
         'sketch': 'linear-gradient(180deg, #111827 0%, #6B7280 100%)',
         'blueprint': 'linear-gradient(180deg, #1A3A5C 0%, #2B5797 100%)',
+        'nightfall': 'linear-gradient(180deg, #f9e2af 0%, #fab387 100%)',
     }
     title_bg = title_gradients.get(theme, title_gradients['default'])
-    
+
+    # 封面内卡片背景（深色主题需要暗底）
+    cover_inner_bgs = {
+        'nightfall': '#1e1e2e',
+        'terminal': '#0D1117',
+    }
+    cover_inner_bg = cover_inner_bgs.get(theme, '#F3F3F3')
+
+    # 封面副标题颜色（深色主题需要亮色）
+    cover_subtitle_colors = {
+        'nightfall': '#cdd6f4',
+        'terminal': '#8B949E',
+    }
+    cover_subtitle_color = cover_subtitle_colors.get(theme, '#000000')
+
+    description = metadata.get('description', '')
+
+    # 有 description 时：标题和副标题紧挨，下方留给描述文字
+    # 无 description 时：保持原布局（标题撑满中间，副标题贴底）
+    if description:
+        title_flex = ''
+        subtitle_margin = f'margin-bottom: {int(height * 0.03)}px;'
+        description_block = f'<div class="cover-description">{description}</div>'
+    else:
+        title_flex = 'flex: 1; display: flex; align-items: flex-start;'
+        subtitle_margin = 'margin-top: auto;'
+        description_block = ''
+
     html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -199,20 +229,20 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
     <title>小红书封面</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
-        
+
         * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }}
-        
+
         body {{
             font-family: 'Noto Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             width: {width}px;
             height: {height}px;
             overflow: hidden;
         }}
-        
+
         .cover-container {{
             width: {width}px;
             height: {height}px;
@@ -220,26 +250,26 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
             position: relative;
             overflow: hidden;
         }}
-        
+
         .cover-inner {{
             position: absolute;
             width: {int(width * 0.88)}px;
             height: {int(height * 0.91)}px;
             left: {int(width * 0.06)}px;
             top: {int(height * 0.045)}px;
-            background: #F3F3F3;
+            background: {cover_inner_bg};
             border-radius: 25px;
             display: flex;
             flex-direction: column;
             padding: {int(width * 0.074)}px {int(width * 0.079)}px;
         }}
-        
+
         .cover-emoji {{
             font-size: {int(width * 0.167)}px;
             line-height: 1.2;
-            margin-bottom: {int(height * 0.035)}px;
+            margin-bottom: {int(height * 0.02)}px;
         }}
-        
+
         .cover-title {{
             font-weight: 900;
             font-size: {title_size}px;
@@ -248,18 +278,29 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            flex: 1;
-            display: flex;
-            align-items: flex-start;
-            word-break: break-all;
+            {title_flex}
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }}
-        
+
         .cover-subtitle {{
             font-weight: 350;
             font-size: {int(width * 0.067)}px;
             line-height: 1.4;
-            color: #000000;
-            margin-top: auto;
+            color: {cover_subtitle_color};
+            {subtitle_margin}
+        }}
+
+        .cover-description {{
+            flex: 1;
+            font-weight: 350;
+            font-size: {int(width * 0.04)}px;
+            line-height: 1.7;
+            color: {cover_subtitle_color};
+            opacity: 0.7;
+            margin-top: {int(height * 0.04)}px;
+            display: flex;
+            align-items: flex-end;
         }}
     </style>
 </head>
@@ -269,6 +310,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
             <div class="cover-emoji">{emoji}</div>
             <div class="cover-title">{title}</div>
             <div class="cover-subtitle">{subtitle}</div>
+            {description_block}
         </div>
     </div>
 </body>
@@ -296,7 +338,8 @@ def generate_card_html(content: str, theme: str, page_number: int = 1,
         'retro': 'linear-gradient(135deg, #D35400 0%, #F39C12 100%)',
         'terminal': 'linear-gradient(135deg, #0D1117 0%, #161B22 100%)',
         'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)',
-        'blueprint': 'linear-gradient(135deg, #2B5797 0%, #3D6BA3 100%)'
+        'blueprint': 'linear-gradient(135deg, #2B5797 0%, #3D6BA3 100%)',
+        'nightfall': 'linear-gradient(135deg, #1e1e2e 0%, #302d41 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
 
