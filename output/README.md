@@ -16,14 +16,32 @@ output/
 - **原材料**：输入的 Markdown 源文件
 - **产出结果**：渲染生成的图片目录（按主题/变体命名）
 
+## 产出记录
+
+### blog-ai-crisis — AI 经济危机推演 (2026-03-22)
+
+- **来源**：CyberMnema `timeline/2026/03/W12/blog-AI经济危机推演-2026-03-21.md`
+- **主题**：`wenkai`（文楷书卷风 — 新增主题）
+- **产出**：封面 + 11 张内容卡
+- **特点**：
+  - 新增 `wenkai` 主题：霞鹜文楷字体 + 宣纸底色 + 朱砂红高亮（浅黄背景色）
+  - 封面去掉 emoji，纯文字排版，降低模板辨识度
+  - 页码改为深色适配浅色背景
+  - 全文保留，仅做分页和关键语句高亮
+- **状态**：已发布
+
+## 下次改进考虑
+
+- **卡片外框差异化**：当前所有卡片的外层容器结构一致（底边渐变 + 固定大小圆角内卡），辨识度高。下次考虑改变内卡的大小、圆角、边距或去掉内卡，让不同主题的卡片结构本身也有区别，而不只是配色不同。
+
 ## 个人偏好
 
-- **首选主题**：`blueprint`（工程蓝图风格）
+- **首选主题**：`wenkai`（文楷书卷风）/ `blueprint`（工程蓝图风格）
 - **首选分页模式**：`auto-split`（自动分页，适合长文）
 - **内容语言**：中文
 - **内容风格**：技术分析类，结构清晰，善用表格和代码块呈现信息
 - **标题风格**：简洁直接，不用夸张标题党
 - **渲染命令常用组合**：
   ```bash
-  python scripts/render_xhs.py output/{topic}/{file}.md -t blueprint -m auto-split -o output/{topic}/{output-dir}
+  python scripts/render_xhs.py output/{topic}/{file}.md -t wenkai -m auto-split -o output/{topic}/{output-dir}
   ```

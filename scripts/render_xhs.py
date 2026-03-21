@@ -65,7 +65,8 @@ AVAILABLE_THEMES = [
     'terminal',
     'sketch',
     'blueprint',
-    'nightfall'
+    'nightfall',
+    'wenkai'
 ]
 
 # 分页模式
@@ -175,7 +176,8 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'terminal': 'linear-gradient(180deg, #0D1117 0%, #21262D 100%)',
         'sketch': 'linear-gradient(180deg, #555555 0%, #999999 100%)',
         'blueprint': 'linear-gradient(180deg, #2B5797 0%, #1A3A5C 100%)',
-        'nightfall': 'linear-gradient(180deg, #1e1e2e 0%, #302d41 100%)'
+        'nightfall': 'linear-gradient(180deg, #1e1e2e 0%, #302d41 100%)',
+        'wenkai': 'linear-gradient(180deg, #F6F1E7 0%, #EDE8DD 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
 
@@ -191,6 +193,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         'sketch': 'linear-gradient(180deg, #111827 0%, #6B7280 100%)',
         'blueprint': 'linear-gradient(180deg, #1A3A5C 0%, #2B5797 100%)',
         'nightfall': 'linear-gradient(180deg, #f9e2af 0%, #fab387 100%)',
+        'wenkai': 'linear-gradient(180deg, #1A1A1A 0%, #3E2723 100%)',
     }
     title_bg = title_gradients.get(theme, title_gradients['default'])
 
@@ -229,6 +232,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
     <title>小红书封面</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&display=swap');
 
         * {{
             margin: 0;
@@ -237,7 +241,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         }}
 
         body {{
-            font-family: 'Noto Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: { "'LXGW WenKai', " if theme == 'wenkai' else "" }'Noto Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             width: {width}px;
             height: {height}px;
             overflow: hidden;
@@ -307,7 +311,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
 <body>
     <div class="cover-container">
         <div class="cover-inner">
-            <div class="cover-emoji">{emoji}</div>
+            {'<div class="cover-emoji">' + emoji + '</div>' if emoji else ''}
             <div class="cover-title">{title}</div>
             <div class="cover-subtitle">{subtitle}</div>
             {description_block}
@@ -339,7 +343,8 @@ def generate_card_html(content: str, theme: str, page_number: int = 1,
         'terminal': 'linear-gradient(135deg, #0D1117 0%, #161B22 100%)',
         'sketch': 'linear-gradient(135deg, #555555 0%, #888888 100%)',
         'blueprint': 'linear-gradient(135deg, #2B5797 0%, #3D6BA3 100%)',
-        'nightfall': 'linear-gradient(135deg, #1e1e2e 0%, #302d41 100%)'
+        'nightfall': 'linear-gradient(135deg, #1e1e2e 0%, #302d41 100%)',
+        'wenkai': 'linear-gradient(135deg, #F6F1E7 0%, #EDE8DD 100%)'
     }
     bg = theme_backgrounds.get(theme, theme_backgrounds['default'])
 
@@ -411,15 +416,16 @@ def generate_card_html(content: str, theme: str, page_number: int = 1,
     <title>小红书卡片</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&display=swap');
+
         * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }}
-        
+
         body {{
-            font-family: 'Noto Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: { "'LXGW WenKai', " if theme == 'wenkai' else "" }'Noto Sans SC', 'Source Han Sans CN', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             width: {width}px;
             overflow: hidden;
             background: transparent;

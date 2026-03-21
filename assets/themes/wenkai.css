@@ -1,0 +1,238 @@
+/* ============================================
+   WenKai - 文楷书卷风
+   霞鹜文楷 + 宣纸底色 + 水墨层次
+   适配小红书卡片渲染
+   ============================================ */
+
+/* 配色定义
+   背景色: #F6F1E7 (宣纸米白)
+   主文字: #2C2C2C (深墨)
+   主色:   #8B1A1A (朱砂红)
+   深色:   #1A1A1A (浓墨)
+   辅助:   #5D4037 (棕墨)
+   浅底:   #EDE8DD (淡宣纸)
+   边框:   #C4B8A8 (旧纸边)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&display=swap');
+
+.card-inner {
+  background-color: #F6F1E7;
+  /* 宣纸微妙色差 */
+  background-image:
+    radial-gradient(ellipse at 15% 50%, rgba(210, 185, 145, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 25%, rgba(195, 175, 140, 0.08) 0%, transparent 40%);
+}
+
+.card-content {
+  font-family: 'LXGW WenKai', 'PingFang SC', 'Microsoft YaHei', serif;
+  color: #2C2C2C;
+  font-size: 36px;
+  line-height: 1.85;
+}
+
+/* === 标题 === */
+
+.card-content h1 {
+  font-size: 54px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 36px;
+  line-height: 1.4;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #C4B8A8;
+}
+
+.card-content h2 {
+  font-size: 44px;
+  font-weight: 700;
+  color: #3E2723;
+  margin: 40px 0 20px 0;
+  line-height: 1.4;
+}
+
+.card-content h3 {
+  font-size: 38px;
+  font-weight: 700;
+  color: #5D4037;
+  margin: 32px 0 16px 0;
+}
+
+/* === 段落 === */
+
+.card-content p {
+  margin-bottom: 28px;
+}
+
+/* === 强调：朱砂 === */
+
+.card-content strong,
+.card-content b {
+  font-weight: 700;
+  color: #8B1A1A;
+  background-color: rgba(255, 240, 140, 0.45);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* === 页码覆盖：深色 === */
+
+.page-number {
+  color: rgba(139, 26, 26, 0.4) !important;
+}
+
+.card-content em,
+.card-content i {
+  font-style: italic;
+  color: #5D4037;
+}
+
+/* === 链接 === */
+
+.card-content a {
+  color: #8B1A1A;
+  text-decoration: none;
+  border-bottom: 1.5px solid rgba(139, 26, 26, 0.4);
+}
+
+/* === 列表 === */
+
+.card-content ul,
+.card-content ol {
+  margin: 20px 0;
+  padding-left: 50px;
+}
+
+.card-content li {
+  margin-bottom: 14px;
+  line-height: 1.75;
+}
+
+.card-content li::marker {
+  color: #8B1A1A;
+  font-weight: 700;
+}
+
+/* === 引用块 === */
+
+.card-content blockquote {
+  margin: 28px 0;
+  padding: 22px 28px;
+  background-color: rgba(139, 26, 26, 0.04);
+  color: #3E2723;
+  border-left: 4px solid #8B1A1A;
+  border-radius: 0 6px 6px 0;
+}
+
+.card-content blockquote p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* === 行内代码 === */
+
+.card-content code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 30px;
+  background-color: rgba(93, 64, 55, 0.08);
+  color: #3E2723;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid #C4B8A8;
+}
+
+/* === 代码块 === */
+
+.card-content pre {
+  margin: 24px 0;
+  padding: 28px;
+  background-color: #2C2C2C;
+  color: #EDE8DD;
+  border-radius: 6px;
+  overflow-x: visible;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.card-content pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border: none;
+  font-size: 28px;
+  line-height: 1.5;
+}
+
+/* === 表格 === */
+
+.card-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 30px;
+}
+
+.card-content thead th {
+  background-color: #3E2723;
+  color: #F6F1E7;
+  font-weight: 700;
+  padding: 12px 16px;
+  text-align: left;
+  border: 1px solid #5D4037;
+}
+
+.card-content tbody td {
+  padding: 10px 16px;
+  border: 1px solid #C4B8A8;
+}
+
+.card-content tbody tr:nth-child(odd) {
+  background-color: rgba(93, 64, 55, 0.04);
+}
+
+.card-content tbody tr:nth-child(even) {
+  background-color: rgba(246, 241, 231, 0.6);
+}
+
+/* === 分割线 === */
+
+.card-content hr {
+  margin: 36px 0;
+  border: none;
+  height: 0;
+  border-top: 1.5px solid #C4B8A8;
+}
+
+/* === 图片 === */
+
+.card-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 24px auto;
+  border: 1px solid #C4B8A8;
+  box-shadow: 0 2px 8px rgba(44, 44, 44, 0.1);
+}
+
+/* === Tags === */
+
+.tags-container {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1.5px solid #C4B8A8;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #8B1A1A;
+  color: #F6F1E7;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 28px;
+  margin: 6px 10px 6px 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
