@@ -206,6 +206,73 @@ Auto-Redbook-Skills/
 
 ---
 
+## New Style System (render.py)
+
+A new rendering system with self-contained styles. Each style fully controls its layout, colors, fonts, and decorations. Completely separate from the old theme system above.
+
+### Usage
+
+```bash
+python scripts/render.py input.md --style paper -o ./output
+```
+
+### Input Format
+
+Markdown file with YAML frontmatter and `---` page separators:
+
+```markdown
+---
+title: "Article Title"
+subtitle: "Optional subtitle"
+---
+
+First section content (becomes cover page with large title).
+
+---
+
+Second section content (becomes page 2).
+
+---
+
+More sections...
+```
+
+### Available Styles
+
+| Style | Description |
+|-------|-------------|
+| `paper` | 笔记纸风格 — horizontal ruled lines + left red margin line |
+
+### Adding New Styles
+
+Create a Python module in `scripts/styles/`:
+
+```python
+# scripts/styles/mystyle.py
+STYLE_NAME = "mystyle"
+STYLE_DESCRIPTION = "My custom style"
+
+def generate_cover(title, subtitle, first_section_html, width, height) -> str:
+    """Return complete HTML for the cover page."""
+
+def generate_card(content_html, page_number, total_pages, width, height) -> str:
+    """Return complete HTML for content pages."""
+```
+
+Then register it in `scripts/styles/__init__.py`.
+
+### Parameters
+
+| Param | Short | Description |
+|-------|-------|-------------|
+| `--style` | `-s` | Style name (required) |
+| `--output-dir` | `-o` | Output directory (default: cwd) |
+| `--width` | `-w` | Image width (default: 1080) |
+| `--height` | | Image height (default: 1440) |
+| `--dpr` | | Device pixel ratio (default: 2) |
+
+---
+
 ## ⚠️ 注意事项
 
 1. **Cookie 安全**：不要把 `.env` 提交到 Git 或共享出去。
