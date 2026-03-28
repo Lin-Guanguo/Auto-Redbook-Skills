@@ -9,8 +9,10 @@ Usage:
 import argparse
 import asyncio
 import os
+import re
 import sys
 from pathlib import Path
+from typing import List
 
 # Ensure styles package is importable
 sys.path.insert(0, str(Path(__file__).parent))
@@ -34,6 +36,99 @@ DEFAULT_HEIGHT = 1440
 MAX_HEIGHT = 4320
 
 
+def split_into_blocks(md_text: str) -> List[str]:
+    """Split markdown into logical blocks, preserving code blocks as single units."""
+    blocks = []
+    current: list[str] = []
+    in_code = False
+
+    for line in md_text.split("\n"):
+        if line.startswith("```"):
+            if not in_code:
+                # Starting a code block — flush any pending text first
+                if current and any(l.strip() for l in current):
+                    blocks.append("\n".join(current))
+                    current = []
+                current.append(line)
+                in_code = True
+            else:
+                # Ending a code block
+                current.append(line)
+                blocks.append("\n".join(current))
+                current = []
+                in_code = False
+        elif in_code:
+            current.append(line)
+        elif line.strip() == "":
+            if current:
+                blocks.append("\n".join(current))
+                current = []
+        else:
+            current.append(line)
+
+    if current:
+        blocks.append("\n".join(current))
+
+    return [b for b in blocks if b.strip()]
+
+
+async def auto_split_content(
+    body_md: str, style, width: int, height: int, dpr: int
+) -> List[str]:
+    """Split markdown body into pages based on actual rendered height."""
+    blocks = split_into_blocks(body_md)
+    if not blocks:
+        return []
+
+    pages: list[str] = []
+    current_blocks: list[str] = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page(
+            viewport={"width": width, "height": height * 3},
+            device_scale_factor=dpr,
+        )
+
+        for block in blocks:
+            # H2 headings force a new page
+            is_h2 = block.strip().startswith("## ")
+            if is_h2 and current_blocks:
+                pages.append("\n\n".join(current_blocks))
+                current_blocks = []
+
+            test_blocks = current_blocks + [block]
+            test_md = "\n\n".join(test_blocks)
+            test_html = convert_markdown_to_html(test_md)
+            card_html = style.generate_card(test_html, 1, 1, width, height)
+
+            await page.set_content(card_html, wait_until="load")
+            await page.evaluate("() => document.fonts.ready")
+
+            content_height = await page.evaluate(
+                """() => {
+                const el = document.querySelector('.content');
+                return el ? el.scrollHeight : document.body.scrollHeight;
+            }"""
+            )
+
+            available = height * 0.92
+
+            if content_height > available and current_blocks:
+                pages.append("\n\n".join(current_blocks))
+                current_blocks = [block]
+            else:
+                current_blocks = test_blocks
+
+        if current_blocks:
+            pages.append("\n\n".join(current_blocks))
+
+        await page.close()
+        await browser.close()
+
+    return pages
+
+
 async def render_html_to_image(
     html_content: str,
     output_path: str,
@@ -47,7 +142,6 @@ async def render_html_to_image(
     await page.set_content(html_content, wait_until="load")
     await page.evaluate("() => document.fonts.ready")
 
-    # Let content determine height (within bounds)
     content_height = await page.evaluate(
         """() => {
         const el = document.querySelector('.page');
@@ -84,19 +178,29 @@ async def render(
     metadata = data["metadata"]
     body = data["body"]
 
-    sections = split_content_by_separator(body)
-    if not sections:
-        print("No content found.")
-        return
-
     title = metadata.get("title", "")
     subtitle = metadata.get("subtitle", "")
 
-    # First section → cover, rest → cards
-    first_section_html = convert_markdown_to_html(sections[0])
-    card_sections = sections[1:]
-    total_pages = 1 + len(card_sections)
+    # Split: first --- separates cover content from body
+    parts = split_content_by_separator(body)
+    if not parts:
+        print("No content found.")
+        return
 
+    cover_md = parts[0]
+    rest_md = "\n\n".join(parts[1:]) if len(parts) > 1 else ""
+
+    # Auto-split the body into pages
+    print("  Analyzing content for auto-split...")
+    if rest_md:
+        card_pages = await auto_split_content(rest_md, style, width, height, dpr)
+    else:
+        card_pages = []
+
+    total_pages = 1 + len(card_pages)
+    print(f"  {total_pages} pages ({1} cover + {len(card_pages)} content)")
+
+    # Render all pages
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(
@@ -105,8 +209,9 @@ async def render(
         )
 
         # Page 1: cover
+        cover_html_content = convert_markdown_to_html(cover_md)
         cover_html = style.generate_cover(
-            title, subtitle, first_section_html, width, height
+            title, subtitle, cover_html_content, width, height
         )
         await render_html_to_image(
             cover_html,
@@ -114,11 +219,11 @@ async def render(
             width, height, max_height, dpr, page,
         )
 
-        # Page 2+: cards
-        for i, section in enumerate(card_sections, start=2):
-            section_html = convert_markdown_to_html(section)
+        # Page 2+: auto-split cards
+        for i, card_md in enumerate(card_pages, start=2):
+            card_html_content = convert_markdown_to_html(card_md)
             card_html = style.generate_card(
-                section_html, i, total_pages, width, height
+                card_html_content, i, total_pages, width, height
             )
             await render_html_to_image(
                 card_html,

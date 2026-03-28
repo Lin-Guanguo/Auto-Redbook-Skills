@@ -1,13 +1,25 @@
 """Style registry. Each style is a Python module with generate_cover() and generate_card()."""
 
+_REGISTRY = {
+    "paper": "styles.paper",
+    "mono": "styles.mono",
+    "stamp": "styles.stamp",
+    "canvas": "styles.canvas",
+    "blueprint": "styles.blueprint",
+    "kraft": "styles.kraft",
+    "block": "styles.block",
+}
+
 
 def get_style(name: str):
     """Returns the style module by name."""
-    if name == "paper":
-        from styles import paper
-        return paper
-    raise ValueError(f"Unknown style: '{name}'. Available: paper")
+    if name not in _REGISTRY:
+        available = ", ".join(sorted(_REGISTRY.keys()))
+        raise ValueError(f"Unknown style: '{name}'. Available: {available}")
+
+    import importlib
+    return importlib.import_module(_REGISTRY[name])
 
 
 def list_styles() -> list[str]:
-    return ["paper"]
+    return sorted(_REGISTRY.keys())
