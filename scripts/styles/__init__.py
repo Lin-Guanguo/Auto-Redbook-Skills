@@ -8,6 +8,7 @@ _REGISTRY = {
     "blueprint": "styles.blueprint",
     "kraft": "styles.kraft",
     "block": "styles.block",
+    "slab": "styles.slab",
 }
 
 
