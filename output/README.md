@@ -18,17 +18,25 @@ output/
 
 ## 产出记录
 
-### blog-ai-crisis — AI 经济危机推演 (2026-03-22)
+| # | 目录 | 文章 | 渲染系统 | 主题 | 页数 | 日期 | 状态 |
+|---|------|------|----------|------|------|------|------|
+| 1 | `blog-ai-crisis` | AI 经济危机推演 | legacy (`render_xhs.py`) | `wenkai` | 12 | 2026-03-22 | 已发布 |
+| 2 | `blog-ai-pyramid` | AI 金字塔 | legacy | `wenkai` | — | 2026-03-22 | 已渲染 |
+| 3 | `anthropic-blog-analysis` | Anthropic 博客分析 | legacy | — | — | 2026-03 | 已渲染 |
+| 4 | `blog-python-type-system` | Python 类型系统（旧版） | legacy | — | — | 2026-03 | 已归档 |
+| 5 | `ai-tech-debt` | AI 写代码很强，又微妙地不行 | new (`render.py`) | `block` | 18 | 2026-03-28 | 已发布 |
+| 6 | `python-type-blog` | 第一次写 Python 项目，一些发现 | new | `paper` | 15 | 2026-03-27 | 已发布 |
+| 7 | `python-type-blog-slab` | （同上，slab 主题测试） | new | `slab` | 19 | 2026-03-30 | 测试 |
+| 8 | `agent-context-memory` | 6 个 Agent 上下文与记忆系统对比 | new | `slab` | 18 | 2026-03-30 | 待发布 |
 
-- **来源**：CyberMnema `timeline/2026/03/W12/blog-AI经济危机推演-2026-03-21.md`
-- **主题**：`wenkai`（文楷书卷风 — 新增主题）
-- **产出**：封面 + 11 张内容卡
-- **特点**：
-  - 新增 `wenkai` 主题：霞鹜文楷字体 + 宣纸底色 + 朱砂红高亮（浅黄背景色）
-  - 封面去掉 emoji，纯文字排版，降低模板辨识度
-  - 页码改为深色适配浅色背景
-  - 全文保留，仅做分页和关键语句高亮
-- **状态**：已发布
+### 主题使用记录
+
+| 主题 | 风格 | 渲染系统 | 用过的文章 |
+|------|------|----------|-----------|
+| `wenkai` | 文楷书卷风：霞鹜文楷 + 宣纸底 + 朱砂红 | legacy | #1, #2 |
+| `paper` | 笔记纸：横线纸 + 左侧红线 + 暖纸底 | new | #6 |
+| `block` | 色块风：藏蓝+靛蓝冷色大色块，现代编辑感 | new | #5 |
+| `slab` | 厚板风：森绿+赤陶暖色大色块，杂志编辑感 | new | #7, #8 |
 
 ## 下次改进考虑
 
@@ -36,12 +44,15 @@ output/
 
 ## 个人偏好
 
-- **首选主题**：`wenkai`（文楷书卷风）/ `blueprint`（工程蓝图风格）
-- **首选分页模式**：`auto-split`（自动分页，适合长文）
+- **首选主题**：`block`（冷色大色块）/ `slab`（暖色大色块）/ `paper`（笔记纸）
+- **首选渲染系统**：new (`render.py`)，自动分页
 - **内容语言**：中文
 - **内容风格**：技术分析类，结构清晰，善用表格和代码块呈现信息
 - **标题风格**：简洁直接，不用夸张标题党
-- **渲染命令常用组合**：
+- **渲染命令**：
   ```bash
-  python scripts/render_xhs.py output/{topic}/{file}.md -t wenkai -m auto-split -o output/{topic}/{output-dir}
+  # 标准 (3:4)
+  python scripts/render.py output/{topic}/input.md --style slab -o output/{topic}
+  # 长页 (接近 9:16，适合表格多的长文)
+  python scripts/render.py output/{topic}/input.md --style slab --height 2020 -o output/{topic}
   ```

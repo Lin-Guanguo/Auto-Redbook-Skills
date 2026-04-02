@@ -167,10 +167,14 @@ async def render(
     height: int,
     max_height: int,
     dpr: int,
+    cover_height: int | None = None,
 ):
     style = get_style(style_name)
+    ch = cover_height or height  # cover uses its own height if specified
     print(f"Rendering: {md_file}")
     print(f"Style: {style.STYLE_NAME} — {style.STYLE_DESCRIPTION}")
+    if cover_height:
+        print(f"  Cover: {width}x{ch}, Content: {width}x{height}")
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -190,7 +194,7 @@ async def render(
     cover_md = parts[0]
     rest_md = "\n\n".join(parts[1:]) if len(parts) > 1 else ""
 
-    # Auto-split the body into pages
+    # Auto-split the body into pages (uses content page height)
     print("  Analyzing content for auto-split...")
     if rest_md:
         card_pages = await auto_split_content(rest_md, style, width, height, dpr)
@@ -208,18 +212,18 @@ async def render(
             device_scale_factor=dpr,
         )
 
-        # Page 1: cover
+        # Page 1: cover (uses cover height)
         cover_html_content = convert_markdown_to_html(cover_md)
         cover_html = style.generate_cover(
-            title, subtitle, cover_html_content, width, height
+            title, subtitle, cover_html_content, width, ch
         )
         await render_html_to_image(
             cover_html,
             os.path.join(output_dir, "page_1.png"),
-            width, height, max_height, dpr, page,
+            width, ch, max_height, dpr, page,
         )
 
-        # Page 2+: auto-split cards
+        # Page 2+: auto-split cards (uses content height)
         for i, card_md in enumerate(card_pages, start=2):
             card_html_content = convert_markdown_to_html(card_md)
             card_html = style.generate_card(
@@ -255,6 +259,10 @@ def main():
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument("--max-height", type=int, default=MAX_HEIGHT)
     parser.add_argument("--dpr", type=int, default=2)
+    parser.add_argument(
+        "--cover-height", type=int, default=None,
+        help="Cover page height (default: same as --height)",
+    )
 
     args = parser.parse_args()
 
@@ -271,6 +279,7 @@ def main():
             height=args.height,
             max_height=args.max_height,
             dpr=args.dpr,
+            cover_height=args.cover_height,
         )
     )
 

@@ -9,6 +9,9 @@ _REGISTRY = {
     "kraft": "styles.kraft",
     "block": "styles.block",
     "slab": "styles.slab",
+    "slab-a": "styles.slab_a",
+    "slab-b": "styles.slab_b",
+    "slab-c": "styles.slab_c",
 }
 
 
