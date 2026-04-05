@@ -12,6 +12,7 @@ _REGISTRY = {
     "slab-a": "styles.slab_a",
     "slab-b": "styles.slab_b",
     "slab-c": "styles.slab_c",
+    "verdict": "styles.verdict",
 }
 
 
