@@ -14,6 +14,7 @@ _REGISTRY = {
     "slab-c": "styles.slab_c",
     "verdict": "styles.verdict",
     "roadmap": "styles.roadmap",
+    "strata": "styles.strata",
 }
 
 

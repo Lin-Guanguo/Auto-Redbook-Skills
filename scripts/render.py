@@ -91,12 +91,6 @@ async def auto_split_content(
         )
 
         for block in blocks:
-            # H2 headings force a new page
-            is_h2 = block.strip().startswith("## ")
-            if is_h2 and current_blocks:
-                pages.append("\n\n".join(current_blocks))
-                current_blocks = []
-
             test_blocks = current_blocks + [block]
             test_md = "\n\n".join(test_blocks)
             test_html = convert_markdown_to_html(test_md)
