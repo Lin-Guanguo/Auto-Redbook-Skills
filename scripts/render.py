@@ -186,14 +186,16 @@ async def render(
         return
 
     cover_md = parts[0]
-    rest_md = "\n\n".join(parts[1:]) if len(parts) > 1 else ""
 
-    # Auto-split the body into pages (uses content page height)
+    # `---` between body sections are HARD page breaks — each section is
+    # auto-split independently so a new section always opens on a fresh page.
     print("  Analyzing content for auto-split...")
-    if rest_md:
-        card_pages = await auto_split_content(rest_md, style, width, height, dpr)
-    else:
-        card_pages = []
+    card_pages: list[str] = []
+    for section in parts[1:]:
+        if section.strip():
+            card_pages.extend(
+                await auto_split_content(section, style, width, height, dpr)
+            )
 
     total_pages = 1 + len(card_pages)
     print(f"  {total_pages} pages ({1} cover + {len(card_pages)} content)")

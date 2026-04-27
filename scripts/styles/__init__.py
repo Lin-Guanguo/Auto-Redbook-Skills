@@ -15,6 +15,7 @@ _REGISTRY = {
     "verdict": "styles.verdict",
     "roadmap": "styles.roadmap",
     "strata": "styles.strata",
+    "essay": "styles.essay",
 }
 
 
