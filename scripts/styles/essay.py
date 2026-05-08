@@ -18,6 +18,36 @@ HIGHLIGHT = "#ffe066"
 ACCENT = "#2b3a5c"
 
 
+def _plain_title(title: str) -> str:
+    return title.replace("<br>", "").replace("<br/>", "").replace("<br />", "")
+
+
+def _title_em_width(title: str) -> float:
+    em = 0.0
+    for ch in _plain_title(title):
+        if ch == " ":
+            em += 0.28
+        elif "\u4e00" <= ch <= "\u9fff" or ch in "——（）：；，。":
+            em += 1.0
+        else:
+            em += 0.56
+    return em
+
+
+def _cover_title_font_size(title: str, width: int) -> int:
+    base = title_font_size(title, width)
+    if "<br" in title:
+        return base
+
+    em = _title_em_width(title)
+    if 0 < em <= 8:
+        pad_x = int(width * 0.07)
+        available = width - 2 * pad_x - 60
+        return min(base, max(72, int(available * 0.94 / em)))
+
+    return base
+
+
 def _essay_css(width: int, height: int) -> str:
     pad_x = int(width * 0.07)
     pad_y = int(height * 0.05)
@@ -175,6 +205,84 @@ body {{
     color: {ACCENT};
 }}
 
+/* ===== Compact reference index ===== */
+.content:has(.index-row) {{
+    font-size: 22px;
+    line-height: 1.25;
+}}
+
+.content:has(.index-row) h2 {{
+    font-size: 38px;
+    margin: 0 0 16px 0;
+}}
+
+.content:has(.index-row) h2::before {{
+    display: none;
+}}
+
+.content:has(.index-row) p {{
+    font-size: 22px;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    color: {MUTED};
+}}
+
+.content .index-title {{
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: {TEXT};
+    margin: 0 0 16px 0;
+    line-height: 1.25;
+    text-align: center;
+}}
+
+.content .index-title::before {{
+    display: none;
+}}
+
+.content .index-note {{
+    font-size: 22px;
+    line-height: 1.3;
+    margin-bottom: 18px;
+    color: {MUTED};
+}}
+
+.content .index-section {{
+    display: block;
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: {ACCENT};
+    margin: 20px 0 8px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(43, 58, 92, 0.25);
+}}
+
+.content .index-row {{
+    display: block;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 17px;
+    line-height: 1.25;
+    margin-bottom: 5px;
+    padding-left: 14px;
+}}
+
+.content .index-row::before {{
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: {ACCENT};
+}}
+
+.content .index-row a {{
+    color: {TEXT};
+    border-bottom: none;
+}}
+
 /* ===== Pullquote (Q2) ===== */
 .content blockquote {{
     border-top: 2px solid {ACCENT};
@@ -322,7 +430,8 @@ def generate_cover(
     width: int,
     height: int,
 ) -> str:
-    t_size = title_font_size(title, width)
+    t_size = _cover_title_font_size(title, width)
+    title_wrap = "white-space: nowrap;" if 0 < _title_em_width(title) <= 8 else ""
     css = _essay_css(width, height)
 
     subtitle_html = ""
@@ -332,7 +441,7 @@ def generate_cover(
     body = f"""
     <div class="page">
         <div class="cover-title-wrap">
-            <span class="cover-title" style="font-size: {t_size}px;">{title}</span>
+            <span class="cover-title" style="font-size: {t_size}px; {title_wrap}">{title}</span>
         </div>
         {subtitle_html}
         <div class="cover-divider">
