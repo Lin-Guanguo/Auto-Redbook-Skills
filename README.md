@@ -47,6 +47,7 @@ More sections...
 | `verdict` | 裁定书 — parchment, serif clauses, red stamp |
 | `roadmap` | 路线图 — light bg + 3-color route system, station markers, highlighter bold |
 | `strata` | 技术地层 — aged parchment + indigo/rust/ochre era bands + § Ⅰ-Ⅶ numerals + ledger tables |
+| `runtime-lab` | Runtime Lab — dark trace console with cyan structure and amber failure states |
 
 ### Parameters
 

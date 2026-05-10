@@ -16,6 +16,8 @@ _REGISTRY = {
     "roadmap": "styles.roadmap",
     "strata": "styles.strata",
     "essay": "styles.essay",
+    "ink": "styles.ink",
+    "runtime-lab": "styles.runtime_lab",
 }
 
 
