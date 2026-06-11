@@ -39,24 +39,66 @@ def _inject_station_markers(html_content: str) -> str:
     return _re.sub(r"<h2([^>]*)>(.*?)</h2>", _replace, html_content)
 
 
-def _cover_title_font_size(title: str, width: int) -> int:
-    clean = _re.sub(r"<[^>]+>", "", title)
-    length = len(clean)
-    if length <= 6:
-        return int(width * 0.15)
-    elif length <= 10:
-        return int(width * 0.12)
-    elif length <= 14:
-        return int(width * 0.10)
-    elif length <= 20:
-        return int(width * 0.08)
-    else:
-        return int(width * 0.065)
+def _cover_title_font_size(title: str, width: int, height: int) -> int:
+    lines = _re.sub(r"<br\s*/?>", "\n", title).split("\n")
+
+    def line_em_width(line: str) -> float:
+        clean = _re.sub(r"<[^>]+>", "", line).strip()
+        width = 0.0
+        for ch in clean:
+            if ch == " ":
+                width += 0.28
+            elif "\u4e00" <= ch <= "\u9fff" or ch in "，。、《》：；（）？":
+                width += 1.0
+            else:
+                width += 0.56
+        return width
+
+    longest = max((line_em_width(line) for line in lines if line.strip()), default=1.0)
+    available = width - int(width * 0.12) - 20
+    size = int(available * 0.86 / longest)
+    max_size = 76 if height <= 900 else 90
+    min_size = 56 if height <= 900 else 64
+    return max(min_size, min(size, max_size))
+
+
+def _strip_cover_repeated_heading(html_content: str, title: str, subtitle: str) -> str:
+    """Avoid rendering source title/subtitle twice on the cover."""
+    if title:
+        clean_title = _re.sub(r"<br\s*/?>", "", title)
+        clean_title = _re.sub(r"<[^>]+>", "", clean_title)
+        html_content = _re.sub(
+            r"^\s*<h1[^>]*>\s*" + _re.escape(clean_title) + r"\s*</h1>\s*",
+            "",
+            html_content,
+            count=1,
+        )
+
+    if subtitle:
+        html_content = _re.sub(
+            r"^\s*<p>\s*副标题：.*?</p>\s*",
+            "",
+            html_content,
+            count=1,
+        )
+
+    return html_content
 
 
 def _roadmap_css(width: int, height: int) -> str:
     pad_x = int(width * 0.06)
     pad_top = int(height * 0.04)
+    compact_cover = height <= 900
+    cover_title_margin = 14 if compact_cover else 22
+    cover_subtitle_size = 39 if compact_cover else 46
+    cover_subtitle_margin = 18 if compact_cover else 28
+    cover_body_size = 27 if compact_cover else 36
+    cover_body_line_height = 1.38 if compact_cover else 1.48
+    route_line_height = 22 if compact_cover else 32
+    route_line_margin = 7 if compact_cover else 12
+    route_dot_size = 11 if compact_cover else 16
+    route_label_size = 15 if compact_cover else 20
+    route_label_display = "none" if compact_cover else "block"
 
     return f"""
 {css_reset()}
@@ -106,13 +148,13 @@ body {{
 .route-line {{
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
-    height: 32px;
+    margin-bottom: {route_line_margin}px;
+    height: {route_line_height}px;
 }}
 
 .route-dot {{
-    width: 16px;
-    height: 16px;
+    width: {route_dot_size}px;
+    height: {route_dot_size}px;
     border-radius: 50%;
     flex-shrink: 0;
     margin-right: 14px;
@@ -126,7 +168,8 @@ body {{
 }}
 
 .route-label {{
-    font-size: 20px;
+    display: {route_label_display};
+    font-size: {route_label_size}px;
     color: rgba(0,0,0,0.3);
     margin-left: 14px;
     flex-shrink: 0;
@@ -138,23 +181,29 @@ body {{
 .cover-title {{
     font-weight: 900;
     color: #0f172a;
-    line-height: 1.25;
-    margin-bottom: 18px;
+    line-height: 1.14;
+    margin-bottom: {cover_title_margin}px;
 }}
 
 .cover-subtitle {{
-    font-size: 36px;
-    color: #64748b;
-    margin-bottom: 32px;
-    line-height: 1.5;
-    padding-bottom: 28px;
+    display: block;
+    font-size: {cover_subtitle_size}px;
+    color: #1e293b;
+    margin-bottom: {cover_subtitle_margin}px;
+    line-height: 1.28;
+    padding: 10px 0 22px;
     border-bottom: 1px solid rgba(0,0,0,0.08);
+}}
+
+.cover-subtitle .subtitle-text {{
+    display: block;
+    font-weight: 900;
 }}
 
 .cover-body {{
     color: #334155;
-    font-size: 36px;
-    line-height: 1.5;
+    font-size: {cover_body_size}px;
+    line-height: {cover_body_line_height};
 }}
 
 .cover-body p {{ margin-bottom: 10px; }}
@@ -242,12 +291,12 @@ body {{
 /* ---- Content ---- */
 .content {{
     color: #334155;
-    font-size: 36px;
-    line-height: 1.65;
+    font-size: 40px;
+    line-height: 1.64;
 }}
 
 .content h1 {{
-    font-size: 56px;
+    font-size: 60px;
     font-weight: 900;
     color: #0f172a;
     margin-bottom: 28px;
@@ -255,7 +304,7 @@ body {{
 }}
 
 .content h2 {{
-    font-size: 46px;
+    font-size: 49px;
     font-weight: 800;
     color: #0f172a;
     margin: 32px -{pad_x}px 18px -{pad_x}px;
@@ -276,7 +325,7 @@ body {{
 }}
 
 .content h3 {{
-    font-size: 40px;
+    font-size: 42px;
     font-weight: 700;
     color: #1e293b;
     margin: 28px 0 14px 0;
@@ -345,7 +394,7 @@ body {{
     padding: 2px 8px;
     border-radius: 3px;
     font-family: 'SF Mono', 'Consolas', monospace;
-    font-size: 30px;
+    font-size: 32px;
     color: {_CYAN};
 }}
 
@@ -472,8 +521,9 @@ body {{
 
 
 def generate_cover(title, subtitle, first_section_html, width, height):
-    t_size = _cover_title_font_size(title, width)
+    t_size = _cover_title_font_size(title, width, height)
     css = _roadmap_css(width, height)
+    cover_body = _strip_cover_repeated_heading(first_section_html, title, subtitle)
 
     route_lines_html = f"""
     <div class="route-lines">
@@ -496,9 +546,13 @@ def generate_cover(title, subtitle, first_section_html, width, height):
 
     subtitle_html = ""
     if subtitle:
-        subtitle_html = f'<div class="cover-subtitle">{subtitle}</div>'
+        subtitle_html = (
+            '<div class="cover-subtitle">'
+            f'<span class="subtitle-text">{subtitle}</span>'
+            '</div>'
+        )
 
-    badge_html = """
+    badge_html = "" if height <= 900 else """
     <div class="cover-badge">
         <span class="badge-dot"></span>
         ROUTE MAP
@@ -508,7 +562,7 @@ def generate_cover(title, subtitle, first_section_html, width, height):
     <div class="page cover-page">
         <div class="cover-title" style="font-size: {t_size}px;">{title}</div>
         {subtitle_html}
-        <div class="cover-body">{first_section_html}</div>
+        <div class="cover-body">{cover_body}</div>
         {route_lines_html}
         {badge_html}
     </div>"""
