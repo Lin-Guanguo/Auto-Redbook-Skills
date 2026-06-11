@@ -28,6 +28,7 @@ output/
 | 6 | `python-type-blog` | 第一次写 Python 项目，一些发现 | new | `paper` | 15 | 2026-03-27 | 已发布 |
 | 7 | `python-type-blog-slab` | （同上，slab 主题测试） | new | `slab` | 19 | 2026-03-30 | 测试 |
 | 8 | `agent-context-memory` | 6 个 Agent 上下文与记忆系统对比 | new | `slab` | 18 | 2026-03-30 | 待发布 |
+| 9 | `agent-engineering-core` | 从工程实践上理解 Agent，核心很简单 | new | `block` | 14 | 2026-06-11 | 已发布 |
 
 ### 主题使用记录
 
@@ -35,7 +36,7 @@ output/
 |------|------|----------|-----------|
 | `wenkai` | 文楷书卷风：霞鹜文楷 + 宣纸底 + 朱砂红 | legacy | #1, #2 |
 | `paper` | 笔记纸：横线纸 + 左侧红线 + 暖纸底 | new | #6 |
-| `block` | 色块风：藏蓝+靛蓝冷色大色块，现代编辑感 | new | #5 |
+| `block` | 色块风：藏蓝+靛蓝冷色大色块，现代编辑感 | new | #5, #9 |
 | `slab` | 厚板风：森绿+赤陶暖色大色块，杂志编辑感 | new | #7, #8 |
 
 ## 下次改进考虑
