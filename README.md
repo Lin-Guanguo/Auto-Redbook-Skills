@@ -130,6 +130,15 @@ pip install markdown pyyaml playwright
 playwright install chromium
 ```
 
+## WeChat MP Renderer (`wechat/`)
+
+Markdown → 公众号编辑器可直接粘贴的内联样式富文本（含剪贴板写入与浏览器预览）。主题 CSS 在 `wechat/themes/` 本地维护。See [wechat/README.md](wechat/README.md).
+
+```bash
+npm install   # first time
+node wechat/render_wechat.mjs output/<topic>/source.md --copy --open
+```
+
 ## Legacy Theme System (`render_xhs.py`)
 
 The old rendering system with 11 CSS themes sharing a fixed HTML layout. Still works, documented in `README.old.md`.
