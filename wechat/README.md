@@ -24,6 +24,8 @@ npm run wechat -- <input.md> [options]
 - `<name>.wechat.html` — 浏览器预览页
 - `<name>.wechat.fragment.html` — 剪贴板实际内容（内联样式 HTML 片段）
 
+输入本身已带渠道名（`wechat.md` / `<name>.wechat.md`）时不重复后缀，直接输出 `wechat.html` / `wechat.fragment.html`。
+
 ## 典型流程
 
 ```bash

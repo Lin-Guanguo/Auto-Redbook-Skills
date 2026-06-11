@@ -211,6 +211,15 @@ function applyWeChatFixups(juicedHtml) {
     $el.parent().after($el)
   })
 
+  // li{display:block} (kept for stable MP paste) suppresses native list
+  // markers, so inject them as text that survives the WeChat sanitizer
+  $('ol').each((_, el) => {
+    const $ol = $(el)
+    const start = Number.parseInt($ol.attr('start') || '1', 10)
+    $ol.children('li').each((i, li) => $(li).prepend(`${start + i}. `))
+  })
+  $('ul > li').each((_, li) => $(li).prepend('• '))
+
   // page-internal anchors make MP saving fail
   $('a[href^="#"]').removeAttr('href')
 
@@ -234,11 +243,32 @@ function applyWeChatFixups(juicedHtml) {
 
 // ---------------------------------------------------------------- clipboard / preview
 
-function copyToClipboard(fragmentPath) {
-  execFileSync('osascript', [
-    '-e',
-    `set the clipboard to (read (POSIX file "${fragmentPath}") as «class HTML»)`,
-  ])
+/**
+ * Write public.html + public.utf8-plain-text to the pasteboard via JXA.
+ * The classic `read ... as «class HTML»` flavor is NOT translated to
+ * public.html, so Chrome (and thus the MP editor) sees an empty clipboard.
+ */
+function copyToClipboard(fragmentPath, plainText) {
+  const jxa = `
+    ObjC.import('AppKit')
+    function run(argv) {
+      const html = $.NSString.stringWithContentsOfFileEncodingError(argv[0], $.NSUTF8StringEncoding, null)
+      const plain = $.NSString.stringWithContentsOfFileEncodingError(argv[1], $.NSUTF8StringEncoding, null)
+      const pb = $.NSPasteboard.generalPasteboard
+      pb.clearContents
+      pb.declareTypesOwner($(['public.html', 'public.utf8-plain-text']), null)
+      pb.setStringForType(html, 'public.html')
+      pb.setStringForType(plain, 'public.utf8-plain-text')
+      return 'ok'
+    }`
+  const plainPath = `${fragmentPath}.txt`
+  fs.writeFileSync(plainPath, plainText)
+  try {
+    execFileSync('osascript', ['-l', 'JavaScript', '-e', jxa, fragmentPath, plainPath])
+  }
+  finally {
+    fs.unlinkSync(plainPath)
+  }
 }
 
 function buildPreviewPage(fragment, title) {
@@ -255,8 +285,25 @@ function buildPreviewPage(fragment, title) {
 </style>
 </head>
 <body>
-<div class="bar">预览宽度 578px ≈ 公众号正文。粘贴用 --copy 写入剪贴板后到 mp.weixin.qq.com 编辑器 Cmd+V。</div>
-<div class="phone">${fragment}</div>
+<div class="bar">预览宽度 578px ≈ 公众号正文。<button id="copy-btn">复制正文</button> 然后到 mp.weixin.qq.com 编辑器 Cmd+V（或用 --copy）。</div>
+<div class="phone" id="content">${fragment}</div>
+<script>
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const html = document.getElementById('content').innerHTML
+  const plain = document.getElementById('content').innerText
+  const btn = document.getElementById('copy-btn')
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([plain], { type: 'text/plain' }),
+    })])
+    btn.textContent = '已复制 ✓'
+  } catch (e) {
+    btn.textContent = '复制失败: ' + e.message
+  }
+  setTimeout(() => { btn.textContent = '复制正文' }, 3000)
+})
+</script>
 </body>
 </html>`
 }
@@ -288,8 +335,10 @@ function main() {
   const outDir = opts.out ? path.resolve(opts.out) : path.dirname(inputPath)
   fs.mkdirSync(outDir, { recursive: true })
   const base = path.basename(inputPath).replace(/\.md$/, '')
-  const previewPath = path.join(outDir, `${base}.wechat.html`)
-  const fragmentPath = path.join(outDir, `${base}.wechat.fragment.html`)
+  // channel-named inputs (wechat.md / foo.wechat.md) skip the extra ".wechat"
+  const channelBase = base === 'wechat' || base.endsWith('.wechat') ? base : `${base}.wechat`
+  const previewPath = path.join(outDir, `${channelBase}.html`)
+  const fragmentPath = path.join(outDir, `${channelBase}.fragment.html`)
 
   const title = meta.title || (body.match(/^#\s+(.+)$/m) || [])[1] || base
   fs.writeFileSync(previewPath, buildPreviewPage(fragment, title))
@@ -304,7 +353,8 @@ function main() {
   }
 
   if (opts.copy) {
-    copyToClipboard(fragmentPath)
+    const plainText = fragment.replace(/<[^>]+>/g, '')
+    copyToClipboard(fragmentPath, plainText)
     console.log('已写入剪贴板（富文本），到公众号编辑器直接 Cmd+V')
   }
   if (opts.open) execFileSync('open', [previewPath])

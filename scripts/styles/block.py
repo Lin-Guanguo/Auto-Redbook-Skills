@@ -52,8 +52,8 @@ body {{
 /* Content typography */
 .content {{
     color: #374151;
-    font-size: 42px;
-    line-height: 1.8;
+    font-size: 36px;
+    line-height: 1.7;
 }}
 
 .content h1 {{
@@ -67,26 +67,26 @@ body {{
 }}
 
 .content h2 {{
-    font-size: 50px;
+    font-size: 46px;
     font-weight: 800;
     color: #ffffff;
     background: #4f46e5;
-    margin: 45px -{pad_x}px 30px;
-    padding: 28px {pad_x}px;
+    margin: 40px -{pad_x}px 28px;
+    padding: 24px {pad_x}px;
     line-height: 1.35;
 }}
 
 .content h3 {{
-    font-size: 46px;
+    font-size: 40px;
     font-weight: 700;
     color: #1e293b;
-    margin: 40px 0 20px 0;
-    padding: 15px 24px;
+    margin: 34px 0 18px 0;
+    padding: 12px 20px;
     background: #e5e7eb;
     display: inline-block;
 }}
 
-.content p {{ margin-bottom: 35px; }}
+.content p {{ margin-bottom: 28px; }}
 
 .content strong {{
     font-weight: 700;
@@ -106,19 +106,19 @@ body {{
     border-bottom: 2px solid #4f46e5;
 }}
 
-.content ul, .content ol {{ margin: 30px 0; padding-left: 50px; }}
-.content li {{ margin-bottom: 18px; line-height: 1.7; }}
+.content ul, .content ol {{ margin: 24px 0; padding-left: 50px; }}
+.content li {{ margin-bottom: 14px; line-height: 1.65; }}
 .content li::marker {{ color: #4f46e5; font-weight: 700; }}
 
 .content blockquote {{
     border: none;
-    padding: 30px 35px;
+    padding: 26px 35px;
     color: #ffffff;
     background: #6366f1;
-    margin: 40px -{pad_x}px;
+    margin: 34px -{pad_x}px;
     padding-left: {pad_x}px;
     padding-right: {pad_x}px;
-    font-size: 40px;
+    font-size: 35px;
 }}
 .content blockquote p {{ margin: 0; }}
 
@@ -127,15 +127,15 @@ body {{
     padding: 6px 14px;
     border-radius: 6px;
     font-family: 'SF Mono', 'Consolas', monospace;
-    font-size: 36px;
+    font-size: 31px;
     color: #4338ca;
 }}
 
 .content pre {{
     background: #1e293b;
     color: #e2e8f0;
-    padding: 40px;
-    margin: 35px -{pad_x}px;
+    padding: 34px;
+    margin: 30px -{pad_x}px;
     padding-left: {pad_x}px;
     padding-right: {pad_x}px;
     overflow-wrap: break-word;
@@ -152,6 +152,40 @@ body {{
 }}
 
 .content hr {{ border: none; height: 3px; background: #e5e7eb; margin: 50px 0; }}
+
+/* Tables */
+.content table {{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    font-size: 30px;
+    line-height: 1.5;
+    table-layout: fixed;
+    word-break: break-word;
+}}
+
+.content thead th {{
+    background: #1e293b;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 28px;
+}}
+
+.content tbody td {{
+    padding: 13px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}}
+
+.content tbody tr:nth-child(odd) td {{
+    background: #f3f4f6;
+}}
+
+.content tbody tr:last-child td {{
+    border-bottom: 3px solid #4f46e5;
+}}
 
 .content img {{
     max-width: 100%;
